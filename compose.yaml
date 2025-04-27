@@ -1,0 +1,37 @@
+services:
+  app:
+    build:
+      context: ./apserver
+      dockerfile: Dockerfile
+    container_name: app
+    restart: always
+    command: ["python", "main.py"]
+    environment:
+      TZ: 'Asia/Tokyo'
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: goMySql1
+      DB_PASSWORD: goMySql1
+      DB_NAME: todoproject
+    ports:
+      - 8000:8000
+    volumes:
+      - ./apserver:/app
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: todoproject
+      MYSQL_USER: goMySql1
+      MYSQL_PASSWORD: goMySql1
+      TZ: 'Asia/Tokyo'
+    command: mysqld
+    volumes:
+      - ./dbserver/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./dbserver/init/:/docker-entrypoint-initdb.d/
+    ports:
+      - 3306:3306
+    cap_add:
+      - SYS_NICE

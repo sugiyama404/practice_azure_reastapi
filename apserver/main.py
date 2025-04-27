@@ -119,7 +119,7 @@ def delete_todo(todo_id):
             sql = "UPDATE todos SET deleted_at = %s WHERE id = %s"
             cursor.execute(sql, (datetime.now(), todo_id))
             connection.commit()
-            return "", 204
+            return jsonify({"message": f"deleted todo with id {todo_id}"}), 201
     finally:
         connection.close()
 

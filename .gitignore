@@ -343,4 +343,6 @@ override.tf.json
 .terraformrc
 terraform.rc
 
+memo.txt
+
 # End of https://www.toptal.com/developers/gitignore/api/python,flask,git,macos,terraform

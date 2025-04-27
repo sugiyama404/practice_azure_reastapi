@@ -1,0 +1,1 @@
+# practice_azure_reastapi

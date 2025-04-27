@@ -10,12 +10,24 @@ variable "region" {
   default     = "ap-northeast-1"
 }
 
+variable "subscription_id" {
+  type = string
+}
+
+variable "container" {
+  type = string
+}
+
 variable "username" {
-  description = "Cognito username"
+  description = "database username"
   type        = string
 }
 
 variable "password" {
-  description = "Cognito password"
+  description = "database password"
   type        = string
+}
+
+variable "detabase_name" {
+  type = string
 }

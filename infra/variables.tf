@@ -4,12 +4,6 @@ variable "app_name" {
   default     = "chatbot"
 }
 
-variable "region" {
-  description = "AWS region to create resources in"
-  type        = string
-  default     = "ap-northeast-1"
-}
-
 variable "subscription_id" {
   type = string
 }

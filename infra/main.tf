@@ -14,18 +14,15 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "rg" {
+resource "azurerm_resource_group" "resource_group" {
   name     = "${var.app_name}-rg"
   location = "Japan East"
 }
 
 # Container Registry
 module "containerregistry" {
-  source = "./modules/containerregistory"
-
-  project        = var.app_name
-  environment    = terraform.workspace
-  resource_group = azurerm_resource_group.rg
+  source         = "./modules/containerregistory"
+  resource_group = azurerm_resource_group.resource_group
 }
 
 # Database
@@ -34,7 +31,7 @@ module "database" {
 
   project        = var.app_name
   environment    = terraform.workspace
-  resource_group = azurerm_resource_group.rg
+  resource_group = azurerm_resource_group.resource_group
   mysql_username = var.username
   mysql_password = var.password
   mysql_database = var.detabase_name
@@ -42,18 +39,10 @@ module "database" {
 
 # App Service
 module "appservice" {
-  source = "./modules/appservice"
-
-  project        = var.app_name
-  environment    = terraform.workspace
-  resource_group = azurerm_resource_group.rg
+  source         = "./modules/appservice"
+  resource_group = azurerm_resource_group.resource_group
   container      = var.container
   mysql_username = var.username
   mysql_password = var.password
   mysql_database = var.detabase_name
-
-  depends_on = [
-    module.containerregistry,
-    module.database
-  ]
 }

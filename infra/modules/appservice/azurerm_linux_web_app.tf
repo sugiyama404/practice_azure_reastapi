@@ -1,5 +1,5 @@
-resource "azurerm_linux_web_app" "app" {
-  name                = "${var.project}-${var.environment}-app"
+resource "azurerm_linux_web_app" "main" {
+  name                = "main"
   resource_group_name = var.resource_group.name
   location            = var.resource_group.location
   service_plan_id     = azurerm_service_plan.asp.id

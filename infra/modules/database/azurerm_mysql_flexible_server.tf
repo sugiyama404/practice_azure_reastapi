@@ -1,11 +1,11 @@
 resource "azurerm_mysql_flexible_server" "mysql" {
   name                = "mysql"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  resource_group_name = var.resource_group.name
+  location            = var.resource_group.location
   sku_name            = "B_Standard_B1ms"
 
-  administrator_login    = var.mysql_username
-  administrator_password = var.mysql_password
+  administrator_login    = var.username
+  administrator_password = var.password
 
   version = "8.0.21"
 

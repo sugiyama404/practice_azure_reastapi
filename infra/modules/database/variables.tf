@@ -13,18 +13,18 @@ variable "resource_group" {
   type        = any
 }
 
-variable "mysql_username" {
+variable "username" {
   description = "MySQL admin username"
   type        = string
 }
 
-variable "mysql_password" {
+variable "password" {
   description = "MySQL admin password"
   type        = string
   sensitive   = true
 }
 
-variable "mysql_database" {
+variable "detabase_name" {
   description = "MySQL database name"
   type        = string
 }

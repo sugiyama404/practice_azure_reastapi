@@ -27,22 +27,23 @@ module "containerregistry" {
 
 # Database
 module "database" {
-  source = "./modules/database"
-
+  source         = "./modules/database"
   project        = var.app_name
   environment    = terraform.workspace
   resource_group = azurerm_resource_group.resource_group
-  mysql_username = var.username
-  mysql_password = var.password
-  mysql_database = var.detabase_name
+  username       = var.username
+  password       = var.password
+  detabase_name  = var.detabase_name
 }
 
 # App Service
 module "appservice" {
-  source         = "./modules/appservice"
-  resource_group = azurerm_resource_group.resource_group
-  container      = var.container
-  mysql_username = var.username
-  mysql_password = var.password
-  mysql_database = var.detabase_name
+  source                = "./modules/appservice"
+  resource_group        = azurerm_resource_group.resource_group
+  container             = var.container
+  username              = var.username
+  password              = var.password
+  detabase_name         = var.detabase_name
+  registry_login_server = module.containerregistry.registry_login_server
+  mysql_fqdn            = module.database.mysql.fqdn
 }

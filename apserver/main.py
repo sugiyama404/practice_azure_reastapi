@@ -14,12 +14,22 @@ app = Flask(__name__)
 
 def get_db_connection():
     try:
+        # Azure環境ではホスト名のみが提供されるため、必要に応じて完全なエンドポイントを構成
+        db_host = os.environ.get('DB_HOST', 'mysql')
+        # Azure MySQL Flexible ServerのFQDNの場合は.mysql.database.azure.comを追加
+        if 'mysql-' in db_host and not db_host.endswith('.mysql.database.azure.com'):
+            db_host = f"{db_host}.mysql.database.azure.com"
+
+        logger.info(f"接続先データベース: {db_host}")
+
         connection = pymysql.connect(
-            host=os.environ.get('DB_HOST', 'db'),
+            host=db_host,
             user=os.environ.get('DB_USER', 'goMySql1'),
             password=os.environ.get('DB_PASSWORD', 'goMySql1'),
             database=os.environ.get('DB_NAME', 'todoproject'),
-            cursorclass=pymysql.cursors.DictCursor
+            cursorclass=pymysql.cursors.DictCursor,
+            # Azure MySQL Flexible Serverに接続する場合はSSL接続を使用
+            ssl={'ssl': db_host.endswith('.mysql.database.azure.com')}
         )
         return connection
     except pymysql.MySQLError as e:
@@ -28,6 +38,42 @@ def get_db_connection():
     except Exception as e:
         logger.error(f"データベース接続中に予期せぬエラーが発生: {e}")
         raise
+
+def init_db():
+    logger.info("データベースの初期化を確認中...")
+    connection = None
+    try:
+        connection = get_db_connection()
+        with connection.cursor() as cursor:
+            # todosテーブルが存在するか確認
+            cursor.execute("""
+                SELECT COUNT(*)
+                FROM information_schema.tables
+                WHERE table_schema = %s
+                AND table_name = 'todos'
+            """, (os.environ.get('DB_NAME', 'todoproject'),))
+
+            if cursor.fetchone()['COUNT(*)'] == 0:
+                logger.info("todosテーブルが存在しません。テーブルを作成します。")
+                # テーブルが存在しない場合は作成
+                cursor.execute("""
+                    CREATE TABLE todos (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        content VARCHAR(255) NOT NULL,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                        deleted_at TIMESTAMP NULL
+                    )
+                """)
+                connection.commit()
+                logger.info("todosテーブルの作成が完了しました。")
+            else:
+                logger.info("todosテーブルは既に存在します。")
+    except Exception as e:
+        logger.error(f"データベース初期化中にエラーが発生: {e}")
+    finally:
+        if connection:
+            connection.close()
 
 def json_serial(obj):
     if isinstance(obj, datetime):
@@ -138,4 +184,5 @@ def delete_todo(todo_id):
         connection.close()
 
 if __name__ == '__main__':
+    init_db()  # アプリケーション起動時にデータベースの初期化を実行
     app.run(debug=True, host='0.0.0.0', port=8000)

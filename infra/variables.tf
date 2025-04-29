@@ -20,10 +20,6 @@ variable "subscription_id" {
   type = string
 }
 
-variable "container" {
-  type = string
-}
-
 variable "username" {
   description = "database username"
   type        = string

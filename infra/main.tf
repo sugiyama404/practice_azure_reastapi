@@ -19,14 +19,15 @@ resource "azurerm_resource_group" "resource_group" {
   location = var.location
 }
 
-# module "resource_providers" {
-#   source = "./modules/resource_providers"
+# Resource Providers
+module "resource_providers" {
+  source = "./modules/resource_providers"
 
-#   providers_to_register = [
-#     "Microsoft.Web",
-#     "Microsoft.ContainerRegistry"
-#   ]
-# }
+  providers_to_register = [
+    "Microsoft.Web",
+    "Microsoft.ContainerRegistry"
+  ]
+}
 
 # Container Registry
 module "containerregistry" {
@@ -55,7 +56,7 @@ module "database" {
 module "appservice" {
   source                  = "./modules/appservice"
   resource_group          = azurerm_resource_group.resource_group
-  container               = var.container
+  image_name              = var.image_name
   username                = var.username
   password                = var.password
   database_name           = var.database_name

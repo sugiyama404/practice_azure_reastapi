@@ -1,5 +1,5 @@
 variable "resource_group" {}
-variable "container" {}
+variable "image_name" {}
 variable "username" {}
 variable "password" {}
 variable "database_name" {}

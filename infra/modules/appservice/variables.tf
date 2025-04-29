@@ -1,0 +1,9 @@
+variable "resource_group" {}
+variable "image_name" {}
+variable "username" {}
+variable "password" {}
+variable "database_name" {}
+variable "registry_login_server" {}
+variable "mysql_fqdn" {}
+variable "registry_admin_username" {}
+variable "registry_admin_password" {}

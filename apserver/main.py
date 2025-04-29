@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 import os
 import pymysql
-import json
 from datetime import datetime
 
 app = Flask(__name__)
@@ -17,7 +16,6 @@ def get_db_connection():
     )
     return connection
 
-# Helper to convert datetime objects to string in JSON responses
 def json_serial(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()

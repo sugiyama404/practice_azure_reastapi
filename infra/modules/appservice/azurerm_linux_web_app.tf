@@ -8,8 +8,8 @@ resource "azurerm_linux_web_app" "main" {
     application_stack {
       docker_image_name        = var.container
       docker_registry_url      = "https://${var.registry_login_server}"
-      docker_registry_username = module.containerregistry.acr.admin_username
-      docker_registry_password = module.containerregistry.acr.admin_password
+      docker_registry_username = var.registry_admin_username
+      docker_registry_password = var.registry_admin_password
     }
   }
 

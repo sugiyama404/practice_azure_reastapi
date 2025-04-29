@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">=4.0"
+      version = ">=4.20"
     }
   }
 }
@@ -28,12 +28,10 @@ module "containerregistry" {
 # Database
 module "database" {
   source         = "./modules/database"
-  project        = var.app_name
-  environment    = terraform.workspace
   resource_group = azurerm_resource_group.resource_group
   username       = var.username
   password       = var.password
-  detabase_name  = var.detabase_name
+  database_name  = var.database_name
 }
 
 # App Service
@@ -43,7 +41,7 @@ module "appservice" {
   container             = var.container
   username              = var.username
   password              = var.password
-  detabase_name         = var.detabase_name
+  database_name         = var.database_name
   registry_login_server = module.containerregistry.registry_login_server
   mysql_fqdn            = module.database.mysql.fqdn
 }

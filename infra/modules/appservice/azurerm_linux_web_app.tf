@@ -18,7 +18,7 @@ resource "azurerm_linux_web_app" "main" {
     "MYSQL_PORT"     = "3306"
     "MYSQL_USER"     = var.username
     "MYSQL_PASSWORD" = var.password
-    "MYSQL_DATABASE" = var.detabase_name
+    "MYSQL_DATABASE" = var.database_name
     "MYSQL_SSL"      = "true"
   }
 

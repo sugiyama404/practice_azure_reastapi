@@ -22,6 +22,6 @@ variable "password" {
   type        = string
 }
 
-variable "detabase_name" {
+variable "database_name" {
   type = string
 }

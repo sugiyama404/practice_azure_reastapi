@@ -2,19 +2,32 @@ from flask import Flask, jsonify, request
 import os
 import pymysql
 from datetime import datetime
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Database connection
 def get_db_connection():
-    connection = pymysql.connect(
-        host=os.environ.get('DB_HOST', 'db'),
-        user=os.environ.get('DB_USER', 'goMySql1'),
-        password=os.environ.get('DB_PASSWORD', 'goMySql1'),
-        database=os.environ.get('DB_NAME', 'todoproject'),
-        cursorclass=pymysql.cursors.DictCursor
-    )
-    return connection
+    try:
+        connection = pymysql.connect(
+            host=os.environ.get('DB_HOST', 'db'),
+            user=os.environ.get('DB_USER', 'goMySql1'),
+            password=os.environ.get('DB_PASSWORD', 'goMySql1'),
+            database=os.environ.get('DB_NAME', 'todoproject'),
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        return connection
+    except pymysql.MySQLError as e:
+        logger.error(f"MySQL接続エラー: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"データベース接続中に予期せぬエラーが発生: {e}")
+        raise
 
 def json_serial(obj):
     if isinstance(obj, datetime):
@@ -39,8 +52,9 @@ def get_todos():
 
 @app.route('/api/todos/<int:todo_id>', methods=['GET'])
 def get_todo(todo_id):
-    connection = get_db_connection()
+    connection = None
     try:
+        connection = get_db_connection()
         with connection.cursor() as cursor:
             sql = "SELECT * FROM todos WHERE id = %s AND deleted_at IS NULL"
             cursor.execute(sql, (todo_id,))
@@ -48,9 +62,17 @@ def get_todo(todo_id):
             if result:
                 return jsonify(result)
             else:
+                logger.info(f"Todo with id {todo_id} not found")
                 return jsonify({"error": "Todo not found"}), 404
+    except pymysql.MySQLError as e:
+        logger.error(f"Database error in get_todo: {e}")
+        return jsonify({"error": "Database error", "details": str(e)}), 500
+    except Exception as e:
+        logger.error(f"Unexpected error in get_todo: {e}")
+        return jsonify({"error": "Unexpected error", "details": str(e)}), 500
     finally:
-        connection.close()
+        if connection:
+            connection.close()
 
 @app.route('/api/todos', methods=['POST'])
 def create_todo():
@@ -65,7 +87,6 @@ def create_todo():
             cursor.execute(sql, (content,))
             connection.commit()
 
-            # Get the newly created todo
             new_id = cursor.lastrowid
             sql = "SELECT * FROM todos WHERE id = %s"
             cursor.execute(sql, (new_id,))
@@ -83,18 +104,15 @@ def update_todo(todo_id):
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
-            # Check if todo exists
             sql = "SELECT * FROM todos WHERE id = %s AND deleted_at IS NULL"
             cursor.execute(sql, (todo_id,))
             if not cursor.fetchone():
                 return jsonify({"error": "Todo not found"}), 404
 
-            # Update todo
             sql = "UPDATE todos SET content = %s WHERE id = %s"
             cursor.execute(sql, (content, todo_id))
             connection.commit()
 
-            # Get the updated todo
             sql = "SELECT * FROM todos WHERE id = %s"
             cursor.execute(sql, (todo_id,))
             result = cursor.fetchone()
@@ -107,13 +125,11 @@ def delete_todo(todo_id):
     connection = get_db_connection()
     try:
         with connection.cursor() as cursor:
-            # Check if todo exists
             sql = "SELECT * FROM todos WHERE id = %s AND deleted_at IS NULL"
             cursor.execute(sql, (todo_id,))
             if not cursor.fetchone():
                 return jsonify({"error": "Todo not found"}), 404
 
-            # Soft delete by setting deleted_at
             sql = "UPDATE todos SET deleted_at = %s WHERE id = %s"
             cursor.execute(sql, (datetime.now(), todo_id))
             connection.commit()

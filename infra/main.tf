@@ -16,22 +16,30 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "resource_group" {
   name     = "${var.app_name}-rg"
-  location = "Japan East"
+  location = var.location
 }
 
-module "resource_providers" {
-  source = "./modules/resource_providers"
+# module "resource_providers" {
+#   source = "./modules/resource_providers"
 
-  providers_to_register = [
-    "Microsoft.Web",
-    "Microsoft.ContainerRegistry"
-  ]
-}
+#   providers_to_register = [
+#     "Microsoft.Web",
+#     "Microsoft.ContainerRegistry"
+#   ]
+# }
 
 # Container Registry
 module "containerregistry" {
   source         = "./modules/containerregistory"
   resource_group = azurerm_resource_group.resource_group
+}
+
+# Bash
+module "bash" {
+  source                = "./modules/bash"
+  image_name            = var.image_name
+  registry_name         = module.containerregistry.registry_name
+  registry_login_server = module.containerregistry.registry_login_server
 }
 
 # Database

@@ -19,6 +19,15 @@ resource "azurerm_resource_group" "resource_group" {
   location = "Japan East"
 }
 
+module "resource_providers" {
+  source = "./modules/resource_providers"
+
+  providers_to_register = [
+    "Microsoft.Web",
+    "Microsoft.ContainerRegistry"
+  ]
+}
+
 # Container Registry
 module "containerregistry" {
   source         = "./modules/containerregistory"

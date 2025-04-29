@@ -1,5 +1,5 @@
 resource "azurerm_linux_web_app" "main" {
-  name                = "main"
+  name                = "mainapp${random_string.unique_key.result}"
   resource_group_name = var.resource_group.name
   location            = var.resource_group.location
   service_plan_id     = azurerm_service_plan.main.id
@@ -14,12 +14,13 @@ resource "azurerm_linux_web_app" "main" {
   }
 
   app_settings = {
-    "MYSQL_HOST"     = var.mysql_fqdn
-    "MYSQL_PORT"     = "3306"
-    "MYSQL_USER"     = var.username
-    "MYSQL_PASSWORD" = var.password
-    "MYSQL_DATABASE" = var.database_name
-    "MYSQL_SSL"      = "true"
+    "MYSQL_HOST"      = var.mysql_fqdn
+    "MYSQL_PORT"      = "3306"
+    "MYSQL_USER"      = var.username
+    "MYSQL_PASSWORD"  = var.password
+    "MYSQL_DATABASE"  = var.database_name
+    "MYSQL_SSL"       = "true"
+    "STARTUP_COMMAND" = "python main.py"
   }
 
   lifecycle {
@@ -27,4 +28,12 @@ resource "azurerm_linux_web_app" "main" {
       site_config[0].application_stack,
     ]
   }
+}
+
+resource "random_string" "unique_key" {
+  length  = 10
+  upper   = false
+  lower   = true
+  numeric = true
+  special = false
 }
